@@ -1,0 +1,109 @@
+\chapter{Vue d'ensemble des notions actuarielles}
+\section*{Introduction}
+Dans ce chapitre, On va introduire le modèle de Lee-Carter, le modèle de Cairns Blake Dowd (CBD) et la notion de taux de mortalité.
+\section{Taux de mortalité}
+\par Un taux de mortalité est une mesure de la fréquence des décès dans une population définie au cours d'un intervalle spécifié. Les mesures de morbidité et de mortalité sont souvent les mêmes mathématiquement; c'est juste une question de ce que vous choisissez de mesurer, la maladie ou la mort. 
+\par Le taux de mortalité à l’âge x d’un individu est notée $\mu_x$, La formule de mortalité d'une population définie, sur une période de temps spécifiée, est donnée par \cite{cours} :
+\begin{equation}
+    \mu_{x+t} = \frac{f_x}{S_x}
+\end{equation}
+  Avec , 
+    
+    \begin{itemize}
+        \item la fonction de répartition $F_x(t) = P(T_x < t | T_x > 0) = tq_x$,
+        \item la fonction de survie $S_x(t) = P(Tx > t | T_x > 0) = tp_x$.
+    \end{itemize}
+
+\section{Modèle de Lee-Carter}
+Il s’agit d’une méthode d’extrapolation des tendances passées initialement utilisée
+sur des données américaines, qui est devenue rapidement un standard. La
+modélisation retenue pour le taux instantané de mortalité est la suivante : 
+\begin{equation}
+\ln \mu_{xt} = \alpha_x + \beta_x\kappa_t + \epsilon_{xt}
+\end{equation}
+où :
+
+- \textbf{$\mu_{xt}$} représente le taux instantané de mortalité à la date t pour l’âge x.
+
+- \textbf{$\alpha_x$} est la composante spécifique à l’âge x, elle s’interprète comme la valeur
+moyenne des \textbf{$\ln \mu_{xt}$} au cours du temps.
+
+- \textbf{$\kappa_t$} décrit l’évolution générale de la mortalité.
+
+- \textbf{$\beta_x$} traduit la sensibilité de la mortalité instantanée à l’âge x par rapport à l’évolution générale \textbf{$\kappa_t$} au sens où \begin{equation}\frac{\partial \ln(\mu_{xt})}{\partial \kappa_t} = \beta_x
+\end{equation}
+
+Ainsi, les âges pour lesquels les \textbf{$\beta_x$} sont importants sont les plus sensibles à l’évolution générale de la mortalité. Le modèle de Lee-Carter suppose la constance au cours du temps de cette sensibilité.
+
+- \textbf{$\epsilon_{xt}$} est une variable aléatoire iid distribuée selon une loi $\mathcal{N}(0,\,\sigma^{2})$. 
+
+L’idée du modèle est donc d’ajuster à la série (doublement indicée par x et t) des logarithmes des taux instantanés de décès une structure paramétrique(déterministe) à laquelle s’ajoute un phénomène aléatoire ; le critère d’optimisation retenu va consister à maximiser la variance expliquée par le modèle, ce qui revient à minimiser la variance des erreurs.
+Afin de rendre le modèle identifiable, il convient d’ajouter des contraintes sur les paramètres ; on retient en général les contraintes suivantes :
+\begin{equation}
+\sum_{x=x_m}^{x_M} \beta_x = 1
+\end{equation}
+\begin{equation}
+\sum_{t=t_m}^{t_M} \kappa_t = 0
+\end{equation}
+
+avec $t_m$ désignant la première année d’observation des taux de mortalité et $t_M$ la
+dernière année de l’étude.
+On obtient alors les paramètres par un critère de moindres carrés :  \begin{equation}
+(\hat{\alpha_x},\hat{\beta_x},\hat{\kappa_x}) = arg min \sum_{x,t} (\ln \hat{\mu_{xt}}-\alpha_x - \beta_x \kappa_t)^2
+\end{equation}
+
+Il convient alors de résoudre ce programme d’optimisation, sous les contraintes d’identifiabilité. Le nombre de paramètres à estimer est élevé, il est égal à
+\begin{equation} 
+2(x_M - x-m + 1) + t_M - t_m -1
+\end{equation}
+
+\section{Procédure d'estimation du modèle Lee-Carter}
+\subsection{Etape 1: Estimation des paramètres partir des données historiques}
+Le modèle n'est pas un modèle de régression classique car ni $(\kappa_t)$ ni $(\beta_x)$  ne sont des paramètres observables.
+Le but est l'estimation par méthode des moindres carrés en minimisant:
+\begin{equation}
+  \min_{\alpha_x,\beta_x,\kappa_t} \sum_{t=1}^{n} \sum_{x=x_min}^{x_max}(\log(\mu_x,t)-\alpha_x-\beta_x\kappa_t)^2
+\end{equation}
+
+La procédure est la décomposition en valeur singulière (SVD):
+\begin{equation}
+\hat{\alpha_x} = \frac{1}{n} \sum_{t=1}^{n} \log(\mu_{x,t})
+\end{equation}
+
+\subsection{Etape 2: Projection de la force de mortalité future}
+\begin{equation}
+log(\mu(x,t)) = \alpha_x + \beta_x\kappa_t
+\end{equation}
+Pour projeter la mortalité, il suffit de projeter la série temporelle $(\kappa_t)$
+Les valeurs de $(\kappa_t)$ peuvent être modélisées par une série chronologique.
+Exemple populaire: marche aléatoire avec tendance
+\begin{equation}
+\kappa_t = d + \kappa_{t-1} + \epsilon_t
+\end{equation}
+On peut obtenir des intervalles de confiance en simulant les
+trajectoires de $(\kappa_t)$.
+\section{Modèle de Cairns Blake Dowd (CBD)}
+Nous avons considéré la formulation originale du modèle fourni par Cairns et al.(2006) avec le
+équation de modèle suivante:
+\begin{equation}
+\ln[\frac{q_{x,t}}{p_{x,t}}] = k_t^{(1)} + k_t^{(2)} (x - \bar{x}) + \epsilon_{x,t}
+\end{equation}
+où
+$k_t^{(1)}$ et $k_t^{(2)}$ sont deux processus stochastiques et représentent les deux indices temporels du modèle;
+$q_{x,t}$ et $p_{x,t}$ représentent respectivement le décès et la probabilité de survie, au temps t pour un individu âgé de x;
+
+\begin{equation}
+\ln[\frac{q_{x,t}}{p_{x,t}}] = \ln(\phi_x) = logit q_{x,t}
+\end{equation} est la transformation logit de $q_{x,t}$
+, avec $\phi_x$ représentant les probabilités de mortalité;
+$\bar{x}$ est l'âge moyen de l'intervalle d'âge considéré; et
+$\epsilon_{x,t}$ est le terme d'erreur qui englobe la tendance historique que le modèle n'exprime pas. La totalité des termes d'erreur sont i.i.d suivant la distribution normale avec moyenne 0 et variance $\sigma^2$.
+
+Le modèle est entièrement identifié, il ne nécessite donc pas de contraintes supplémentaires.
+De plus, l'indice de temps $k_t^{(1)}$ est l'interception du modèle. Il affecte tous les âges de la même manière, et il représente le niveau de mortalité au temps t. Plus précisément, s'il diminue avec le temps, cela signifie que le taux de mortalité a diminué avec le temps à tous les âges. L'indice de temps $k_t^{(2)}$ représente la pente du modèle: chaque âge est affecté différemment par ce paramètre. Par exemple, si pendant la période d'essayage,
+les améliorations de la mortalité ont été plus importantes à des âges inférieurs qu'à des âges plus élevés, le terme de période de pente
+$k_t^{(2)}$ augmenterait avec le temps. Dans un tel cas, le graphique du logit des probabilités de décès par rapport à l'âge deviendrait plus raide à mesure qu'il se déplaçait vers le bas avec le temps (Pitacco et al.2009)
+
+
+\section*{Conclusion}
+Au cours de la section précédente, nous avons défini les différentes notions de l'actuariat vie que nous allons utiliser dans ce qui suit.
